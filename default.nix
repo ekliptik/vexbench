@@ -1,7 +1,10 @@
+# Copyright HighTec EDV-Systeme GmbH
+# SPDX-License-Identifier: MIT
+
 with import <nixpkgs> {};
 
 stdenv.mkDerivation {
-  name = "yourBuildName";
+  name = "VexBench32";
   buildInputs = with pkgs; [
     gnumake
     clang
