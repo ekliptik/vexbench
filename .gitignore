@@ -1,0 +1,11 @@
+build/
+obj_dir/
+.vscode/
+result/
+*.fst
+*.debugTrace
+*.logTrace
+*.vcd
+*.log
+log
+result
