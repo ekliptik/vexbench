@@ -8,11 +8,12 @@
 
 #include <sys/stat.h>
 #include <errno.h>
+#include <stdio.h>
 #include <stdint.h>
 #include "uart.h"
 
 #undef errno
-extern int errno;
+extern NEWLIB_THREAD_LOCAL_ERRNO int errno;
 
 
 #pragma GCC diagnostic push
@@ -24,10 +25,11 @@ void _exit(int code) {
 #pragma GCC diagnostic pop
 
 
-// int putchar(int c) {
-// 	uart_write(UART, c);
-// 	return c;
-// }
+int this_putc(char c, FILE *file) {
+ 	uart_write(UART, c);
+	return (unsigned char) c;
+}
+
 // int puts(const char*str){
 // 	while(*str){
 // 		(void)putchar(*str);
@@ -35,6 +37,36 @@ void _exit(int code) {
 // 	}
 //     return 0;
 // }
+
+#ifdef __strong_reference
+#define STDIO_ALIAS(x) __strong_reference(stdin, x);
+#else
+#define STDIO_ALIAS(x) FILE *const x = &__stdio;
+#endif
+
+static int
+dummy_getc(FILE *file)
+{
+        (void) file;
+        return EOF;
+}
+
+static int
+dummy_flush(FILE *file)
+{
+        (void) file;
+        return 0;
+}
+
+
+#ifdef FDEV_SETUP_STREAM
+    static FILE __stdio = FDEV_SETUP_STREAM(this_putc, dummy_getc, dummy_flush, _FDEV_SETUP_WRITE);
+    FILE *const stdin = &__stdio;
+    STDIO_ALIAS(stdout);
+    STDIO_ALIAS(stderr);
+#else
+#error
+#endif
 
 /**
 * It is assumed that there is exactly only process running and that
