@@ -344,18 +344,21 @@ ifneq ($(ZEPHYR),no)
 endif
 endif
 
-all: clean run
+all: clean compile
 
 run: compile
-	./obj_dir/VVexRiscv
+	./obj_dir/VVexRiscv ${RUN_HEX}
 
+FLTO=
+FLTO=-flto -fuse-ld=lld
 verilate: ${VEXRISCV_FILE}
 	cp ${VEXRISCV_FILE}*.bin . | true
-	verilator --compiler ${CC} -cc  ${VEXRISCV_FILE}  -O3 -CFLAGS -std=c++11 -LDFLAGS -pthread  ${ADDCFLAGS} --gdbbt ${VERILATOR_ARGS} -Wno-UNOPTFLAT -Wno-WIDTH --x-assign unique --exe main.cpp
- 	
+	verilator --compiler ${CC} -cc  ${VEXRISCV_FILE}  -O3 -CFLAGS "-std=c++11 -Ofast ${FLTO}" -LDFLAGS "-pthread -Ofast ${FLTO}"  ${ADDCFLAGS} --gdbbt ${VERILATOR_ARGS} -Wno-UNOPTFLAT -Wno-WIDTH --x-assign unique --exe main.cpp
+
 compile: verilate
-	make  -j${THREAD_COUNT} -C obj_dir/ -f VVexRiscv.mk VVexRiscv
- 	
+	readlink -f obj_dir/
+	make -j${THREAD_COUNT} -C obj_dir/ -f VVexRiscv.mk VVexRiscv
+
 clean:
 	rm -rf obj_dir
- 	
+

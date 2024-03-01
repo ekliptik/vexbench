@@ -100,7 +100,8 @@ uint32_t hToI(char *c, uint32_t size) {
 void loadHexImpl(string path,Memory* mem) {
 	FILE *fp = fopen(&path[0], "r");
 	if(fp == 0){
-		cout << path << " not found" << endl;
+		cerr << path << " not found" << endl;
+		exit(1);
 	}
 	//Preload 0x0 <-> 0x80000000 jumps
 	((uint32_t*)mem->get(0))[0] = 0x800000b7;
@@ -4171,6 +4172,12 @@ int main(int argc, char **argv, char **env) {
     #endif
 	Verilated::randReset(2);
 	Verilated::commandArgs(argc, argv);
+	#ifdef RUN_HEX
+	if (argc != 2) {
+		fprintf(stderr, "Wrong number of arguments (expected one: .hex filename)\n");
+		return 1;
+	}
+	#endif
 
 	printf("BOOT\n");
 	timespec startedAt = timer_start();
@@ -4289,8 +4296,7 @@ int main(int argc, char **argv, char **env) {
 		{
 			WorkspaceRegression w("run");
 			#ifdef RUN_HEX
-			//w.loadHex("/home/spinalvm/hdl/zephyr/zephyrSpinalHdl/samples/synchronization/build/zephyr/zephyr.hex");
-			w.loadHex(RUN_HEX);
+			w.loadHex(argv[1]);
 			w.withRiscvRef();
 			#endif
 			w.setIStall(false);
