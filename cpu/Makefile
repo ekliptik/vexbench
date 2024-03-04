@@ -350,7 +350,8 @@ run: compile
 	./obj_dir/VVexRiscv ${RUN_HEX}
 
 FLTO=
-FLTO=-flto -fuse-ld=lld
+# FLTO=-flto
+# FLTO=-flto -fuse-ld=lld
 verilate: ${VEXRISCV_FILE}
 	cp ${VEXRISCV_FILE}*.bin . | true
 	verilator --compiler ${CC} -cc  ${VEXRISCV_FILE}  -O3 -CFLAGS "-std=c++11 -Ofast ${FLTO}" -LDFLAGS "-pthread -Ofast ${FLTO}"  ${ADDCFLAGS} --gdbbt ${VERILATOR_ARGS} -Wno-UNOPTFLAT -Wno-WIDTH --x-assign unique --exe main.cpp
